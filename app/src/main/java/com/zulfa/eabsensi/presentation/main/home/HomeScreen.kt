@@ -1,5 +1,4 @@
 import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Build
 import android.os.Looper
 import android.provider.Settings
@@ -37,7 +36,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -353,29 +351,44 @@ import java.util.Locale
                 }
 
                 OutlinedButton(
-                    onClick = {  if(!isLocationEnabled(context)) {
-                        showDialogLocationOff = true
-                    }else {
-                        currentLocation?.let { loc ->
-                        when {
-                            isMock -> showDialogMock = true
-                            !isInsideCircle(loc,officeLocation,radius) -> {
-                                pendingLocation = loc   // save location for later confirm
-                                showDialogOutOfArea = true
-                            }
-                            else -> {
-                                viewModel.markAttendance(
-                                    userId = user.id,
-                                    latitude = loc.latitude,
-                                    longitude = loc.longitude,
-                                    androidId = Settings.Secure.getString(
-                                        context.contentResolver,
-                                        Settings.Secure.ANDROID_ID
-                                    )
-                                )
+                    onClick = {        when {
+                        // 🚨 Location permission not granted
+                        !locationPermissionState.status.isGranted -> {
+                            showDialogLocationOff = true
+                            locationPermissionState.launchPermissionRequest()
+                        }
+
+                        // 🚨 Location service (GPS) off
+                        !isLocationEnabled(context) -> {
+                            showDialogLocationOff = true
+                        }
+
+                        else -> {
+                            currentLocation?.let { loc ->
+                                when {
+                                    isMock -> showDialogMock = true
+                                    !isInsideCircle(loc, officeLocation, radius) -> {
+                                        pendingLocation = loc
+                                        showDialogOutOfArea = true
+                                    }
+                                    else -> {
+                                        viewModel.markAttendance(
+                                            userId = user.id,
+                                            latitude = loc.latitude,
+                                            longitude = loc.longitude,
+                                            androidId = Settings.Secure.getString(
+                                                context.contentResolver,
+                                                Settings.Secure.ANDROID_ID
+                                            )
+                                        )
+                                    }
+                                }
+                            } ?: run {
+                                // 🚨 No location yet (maybe still loading)
+                                showDialogLocationOff = true
                             }
                         }
-                    }}
+                    }
                     },
                     modifier = Modifier
                         .width(210.dp)
@@ -558,16 +571,34 @@ import java.util.Locale
     }
 
     if (showDialogLocationOff) {
+        val context = LocalContext.current
+
         AlertDialog(
             onDismissRequest = { showDialogLocationOff = false },
             confirmButton = {
-                TextButton(onClick = { showDialogLocationOff = false }) {
-                    Text("OK")
+                Row {
+                    // 🔹 Button to open device location settings
+                    TextButton(
+                        onClick = {
+                            showDialogLocationOff = false
+                            val intent = android.content.Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text("Buka Pengaturan", color = Color(0xFF0284C7))
+                    }
+
+                    // 🔹 OK button to close dialog
+                    TextButton(onClick = { showDialogLocationOff = false }) {
+                        Text("OK", color = Color(0xFF0284C7))
+                    }
                 }
             },
             title = {
-                Column(modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Image(
                         painter = painterResource(id = R.drawable.location_warning_2),
                         contentDescription = null,
@@ -575,15 +606,20 @@ import java.util.Locale
                             .size(48.dp)
                             .padding(bottom = 8.dp)
                     )
-                    Text("Lokasi Tidak Aktif",style = TextStyle(
-                        fontFamily = Poppins,
-                        fontWeight = FontWeight.Light,
-                        fontSize = 16.sp,
-                        color = Color(0xFFA72929)
-                    ))
+                    Text(
+                        "Lokasi Tidak Aktif atau Belum diizinkan",
+                        style = TextStyle(
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.Light,
+                            fontSize = 16.sp,
+                            color = Color(0xFFA72929)
+                        )
+                    )
                 }
             },
-            text = { Text("Aktifkan GPS atau layanan lokasi untuk merekam waktu masuk.") }
+            text = {
+                Text("Aktifkan GPS atau layanan lokasi untuk merekam waktu masuk.")
+            }
         )
     }
     if (showErrorDialog) {
