@@ -35,7 +35,7 @@ class HomeViewModel(
         private set
 
     fun getAnnouncement() {
-        Log.e("HomeViewModel", "Fetching announcements...")
+//        Log.e("HomeViewModel", "Fetching announcements...")
         viewModelScope.launch {
             authUseCase.getAnnouncement()
                 .collect { result ->
@@ -46,7 +46,7 @@ class HomeViewModel(
 
     fun markAnnouncementShown() {
         hasShownAnnouncement = true
-        Log.e("HomeViewModel", "Announcement marked as shown")
+//        Log.e("HomeViewModel", "Announcement marked as shown")
     }
 
     fun requestLeave(
@@ -54,13 +54,13 @@ class HomeViewModel(
         notes: String
     ) {
         val attendanceId = currentAttendance?.id
-        Log.d("UI", "userId=$userId attendanceId=$attendanceId")
+//        Log.d("UI", "userId=$userId attendanceId=$attendanceId")
 
         if (attendanceId.isNullOrEmpty()) {
-            Log.e("UI", "Attendance ID is null, cannot mark attendance")
+//            Log.e("UI", "Attendance ID is null, cannot mark attendance")
             return
         }
-        Log.d("UI", "userId=$userId attendanceId=$attendanceId")
+//        Log.d("UI", "userId=$userId attendanceId=$attendanceId")
 
         viewModelScope.launch {
 
@@ -76,7 +76,7 @@ class HomeViewModel(
     }
 
     fun getTodayAttendance() {
-        Log.d("HomeViewModel", "Fetching today's attendance...")
+//        Log.d("HomeViewModel", "Fetching today's attendance...")
 
         viewModelScope.launch {
             authUseCase.getTodayAttendance()
@@ -86,7 +86,7 @@ class HomeViewModel(
                     // ✅ cache the attendance if success
                     if (result is Resource.Success) {
                         currentAttendance = result.data
-                        Log.d("HomeViewModel", "Cached currentAttendance: $currentAttendance")
+//                        Log.d("HomeViewModel", "Cached currentAttendance: $currentAttendance")
 
                     }
                 }
@@ -100,13 +100,13 @@ class HomeViewModel(
         androidId: String
     ) {
         val attendanceId = currentAttendance?.id
-        Log.d("UI", "userId=$userId attendanceId=$attendanceId")
+//        Log.d("UI", "userId=$userId attendanceId=$attendanceId")
 
         if (attendanceId.isNullOrEmpty()) {
-            Log.e("UI", "Attendance ID is null, cannot mark attendance")
+//            Log.e("UI", "Attendance ID is null, cannot mark attendance")
             return
         }
-        Log.d("UI", "userId=$userId attendanceId=$attendanceId")
+//        Log.d("UI", "userId=$userId attendanceId=$attendanceId")
         viewModelScope.launch {
             authUseCase.markAttendance(userId, attendanceId, latitude, longitude, androidId)
                 .collect { result ->

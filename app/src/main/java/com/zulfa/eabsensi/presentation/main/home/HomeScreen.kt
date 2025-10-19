@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -62,6 +63,7 @@ import com.zulfa.eabsensi.presentation.helper.getTodayDate
 import com.zulfa.eabsensi.presentation.helper.isInsideCircle
 import com.zulfa.eabsensi.presentation.helper.isLocationEnabled
 import com.zulfa.eabsensi.presentation.helper.isMockLocation
+import com.zulfa.eabsensi.presentation.helper.responsiveFontSize
 import com.zulfa.eabsensi.presentation.main.home.HomeViewModel
 import com.zulfa.eabsensi.presentation.theme.Poppins
 import kotlinx.coroutines.delay
@@ -104,6 +106,11 @@ import java.util.Locale
         val markAttendanceState by viewModel.markAttendanceState.collectAsState()
         val requestLeaveState by viewModel.requestLeaveState.collectAsState()
 
+
+        val configuration = LocalConfiguration.current
+        val screenHeight = configuration.screenHeightDp.dp
+        val screenWidth = configuration.screenWidthDp.dp
+
         LaunchedEffect(Unit) {
             viewModel.getAnnouncement()
             viewModel.getTodayAttendance()
@@ -129,7 +136,7 @@ import java.util.Locale
         else -> null
     }
 
-    val waktuMasuk = attendanceData?.checkInTime ?: "-"
+    val waktuMasuk = attendanceData?.checkInTime?:"-"
     val posisiMasuk = attendanceData?.status?:"-"
 
 
@@ -292,8 +299,8 @@ import java.util.Locale
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(360.dp)
-                .padding(horizontal = 16.dp),
+                .height(screenHeight * 0.35f)
+                .padding(horizontal = screenWidth * 0.04f),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -321,18 +328,19 @@ import java.util.Locale
             }
         }
 
+        // Card for Waktu Masuk Tercatat and Posisi Tercatat with responsive spacing
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(220.dp)
-                .padding(horizontal = 16.dp),
+                .height(screenHeight * 0.35f)
+                .padding(horizontal = screenWidth * 0.04f),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
-
         ){
+
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier =  Modifier.padding(screenWidth * 0.04f),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -341,12 +349,12 @@ import java.util.Locale
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text("Waktu Masuk Tercatat", fontFamily = Poppins, fontWeight = FontWeight.Bold)
-                        Text(formatTimeToWITA(waktuMasuk), color = Color(0xFF1565C0), fontWeight = FontWeight.Bold)
+                        Text("Waktu Masuk Tercatat", fontFamily = Poppins, fontWeight = FontWeight.Bold,fontSize = responsiveFontSize(screenWidth, 14.sp))
+                        Text(formatTimeToWITA(waktuMasuk), color = Color(0xFF1565C0), fontWeight = FontWeight.Bold, fontSize = responsiveFontSize(screenWidth, 14.sp))
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("Posisi Tercatat",fontFamily = Poppins, fontWeight = FontWeight.Bold)
-                        Text(posisiMasuk, color = Color(0xFF03A9F4), fontWeight = FontWeight.Bold)
+                        Text("Posisi Tercatat",fontFamily = Poppins, fontWeight = FontWeight.Bold,fontSize = responsiveFontSize(screenWidth, 14.sp))
+                        Text(posisiMasuk, color = Color(0xFF03A9F4), fontWeight = FontWeight.Bold, fontSize = responsiveFontSize(screenWidth, 14.sp))
                     }
                 }
 
@@ -403,7 +411,7 @@ import java.util.Locale
                         style = TextStyle(
                             fontFamily = Poppins,
                             fontWeight = FontWeight.Light,
-                            fontSize = 16.sp,
+                            fontSize = responsiveFontSize(screenWidth,16.sp),
                             color = Color(0xFF0284C7)
                         )
                     )
@@ -423,7 +431,7 @@ import java.util.Locale
                         style = TextStyle(
                             fontFamily = Poppins,
                             fontWeight = FontWeight.Light,
-                            fontSize = 16.sp,
+                            fontSize = responsiveFontSize(screenWidth,16.sp),
                             color = Color(0xFF0284C7)
                         )
                     )
@@ -458,7 +466,7 @@ import java.util.Locale
                 style = TextStyle(
                 fontFamily = Poppins,
                 fontWeight = FontWeight.Light,
-                fontSize = 16.sp,
+                fontSize = responsiveFontSize(screenWidth,16.sp),
                 color = Color(0xFF0284C7))
             ) },
             text = {

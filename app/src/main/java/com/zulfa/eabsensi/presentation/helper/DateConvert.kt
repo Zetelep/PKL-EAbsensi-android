@@ -13,7 +13,7 @@ import java.util.Locale
 fun formatDateToIndonesian(dateString: String): String {
     return try {
         val localDate = LocalDate.parse(dateString, DateTimeFormatter.ISO_DATE) // yyyy-MM-dd
-        val formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy", Locale("id", "ID"))
+        val formatter = DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy", Locale("id", "ID"))
         localDate.format(formatter)
     } catch (e: Exception) {
         dateString // fallback kalau parsing gagal

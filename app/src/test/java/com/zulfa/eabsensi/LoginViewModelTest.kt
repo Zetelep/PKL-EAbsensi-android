@@ -42,7 +42,6 @@ class LoginViewModelTest {
 
     @Test
     fun `login success updates state with success`() = runTest {
-        // Given
         val fakeResult = LoginDomain(
             "123", "Zulfa",
             user = UserDomain(
@@ -53,11 +52,9 @@ class LoginViewModelTest {
         `when`(authUseCase.login("user", "pass"))
             .thenReturn(flowOf(Resource.Success(fakeResult)))
 
-        // When
         viewModel.login("user", "pass")
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // Then
         val state = viewModel.loginState.value
         assert(state is Resource.Success && state.data == fakeResult)
         verify(authUseCase).login("user", "pass")
@@ -65,16 +62,13 @@ class LoginViewModelTest {
 
     @Test
     fun `login failure updates state with error`() = runTest {
-        // Given
         val errorMessage = "Invalid credentials"
         `when`(authUseCase.login("wrong", "wrong"))
             .thenReturn(flowOf(Resource.Error(errorMessage)))
 
-        // When
         viewModel.login("wrong", "wrong")
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // Then
         val state = viewModel.loginState.value
         assert(state is Resource.Error && state.message == errorMessage)
         verify(authUseCase).login("wrong", "wrong")

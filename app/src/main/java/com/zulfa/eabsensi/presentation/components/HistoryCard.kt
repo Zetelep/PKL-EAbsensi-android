@@ -17,11 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.zulfa.eabsensi.presentation.helper.responsiveFontSize
 import com.zulfa.eabsensi.presentation.theme.Poppins
 
 @Composable
-fun HistoryCard(date: String, time: String, status: String) {
+fun HistoryCard(date: String, time: String, status: String, Width: Dp) {
     Card(
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(6.dp),
@@ -44,6 +47,7 @@ fun HistoryCard(date: String, time: String, status: String) {
                     text = date,
                     fontFamily = Poppins,
                     fontWeight = FontWeight.Bold,
+                    fontSize = responsiveFontSize(screenWidth = Width, 12.sp)
                 )
             }
 
@@ -63,6 +67,7 @@ fun HistoryCard(date: String, time: String, status: String) {
                         fontFamily = Poppins,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
+                        fontSize = responsiveFontSize(screenWidth = Width, 12.sp),
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
@@ -71,6 +76,7 @@ fun HistoryCard(date: String, time: String, status: String) {
                         fontWeight = FontWeight.Bold,
                         fontFamily = Poppins,
                         textAlign = TextAlign.Center,
+                        fontSize = responsiveFontSize(screenWidth = Width, 12.sp),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -84,6 +90,7 @@ fun HistoryCard(date: String, time: String, status: String) {
                         "Status",
                         fontFamily = Poppins,
                         fontWeight = FontWeight.Bold,
+                        fontSize = responsiveFontSize(screenWidth = Width, 12.sp),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -93,9 +100,11 @@ fun HistoryCard(date: String, time: String, status: String) {
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
+                        fontSize = responsiveFontSize(screenWidth = Width, 12.sp),
                         color = when (status) {
                             "Hadir" -> Color(0xFF4CAF50)
-                            "DI LUAR AREA" -> Color(0xFF03A9F4)
+                            "Di Luar Area" -> Color(0xFF03A9F4)
+                            "Izin Disetujui" -> Color(0xFF4CAF50)
                             else -> Color(0xFF9E9E9E)
                         }
                     )
@@ -103,11 +112,4 @@ fun HistoryCard(date: String, time: String, status: String) {
             }
         }
     }
-}
-
-
-@Preview
-@Composable
-fun HistoryCardPreview() {
-    HistoryCard("Senin,\n12 Oktober 2024", "08:00", "DI LUAR AREA")
 }

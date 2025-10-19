@@ -61,7 +61,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                                 id = if (isSelected) item.activeIcon else item.inactiveIcon
                             ),
                             contentDescription = item.route,
-                            modifier = Modifier.size(34.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                     },
                     label = null,

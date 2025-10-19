@@ -204,7 +204,11 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(11.dp))
 
             OutlinedButton(
-                onClick = { viewModel.login(username, password) },
+                onClick = { if (username.isBlank() || password.isBlank()) {
+                    Toast.makeText(context, "Username dan password tidak boleh kosong", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.login(username.trim(), password.trim())
+                } },
                 modifier = Modifier
                     .width(133.dp)
                     .height(50.dp),
@@ -212,13 +216,6 @@ fun LoginScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0F2FE)), // blue color
                 shape = RoundedCornerShape(50),
             ) {
-//                if (loginState is Resource.Loading) {
-//                    CircularProgressIndicator(
-//                        modifier = Modifier.size(24.dp),
-//                        color = Color(0xFF0284C7),
-//                        strokeWidth = 2.dp
-//                    )
-//                } else {
                     Text(
                         text = "LOGIN",
                         textAlign = TextAlign.Center,
