@@ -59,7 +59,7 @@ fun HistoryCard(date: String, time: String, status: String, Width: Dp) {
             ) {
                 // Kolom Waktu Masuk
                 Column(
-                    modifier = Modifier.width(100.dp),
+                    modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -83,7 +83,7 @@ fun HistoryCard(date: String, time: String, status: String, Width: Dp) {
 
                 // Kolom Status
                 Column(
-                    modifier = Modifier.width(100.dp),
+                    modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(

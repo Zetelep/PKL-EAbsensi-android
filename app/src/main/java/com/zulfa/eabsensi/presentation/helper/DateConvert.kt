@@ -35,7 +35,7 @@ fun formatDateToIndonesian2(dateString: String): String {
 @RequiresApi(Build.VERSION_CODES.O)
 fun getTodayDate(): String {
     val today = LocalDate.now()
-    val formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy", Locale("id", "ID"))
+    val formatter = DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy", Locale("id", "ID"))
     return today.format(formatter)
 }
 

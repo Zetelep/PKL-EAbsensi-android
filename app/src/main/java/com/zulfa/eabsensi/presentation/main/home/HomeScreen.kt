@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -265,32 +266,50 @@ import java.util.Locale
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                Column {
                     Text(
                         "Halo,",
                         fontFamily = Poppins,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+                        fontSize = responsiveFontSize(screenWidth, 14.sp)
                     )
-                    Text(user.name, fontFamily = Poppins, fontSize = 14.sp, color = Color.Gray)
+                    Text(
+                        user.name,
+                        fontFamily = Poppins,
+                        fontSize = responsiveFontSize(screenWidth, 14.sp),
+                        color = Color.Gray,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
-                Column(horizontalAlignment = Alignment.End) {
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.End
+                ) {
                     Text(
-                        getTodayDate(),
+                        text = getTodayDate(),
                         fontFamily = Poppins,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        fontSize = responsiveFontSize(screenWidth, 14.sp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false
                     )
                     Text(
-                        currentTime,
+                        text = currentTime,
                         fontFamily = Poppins,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+                        fontSize = responsiveFontSize(screenWidth, 14.sp)
                     )
                 }
             }
