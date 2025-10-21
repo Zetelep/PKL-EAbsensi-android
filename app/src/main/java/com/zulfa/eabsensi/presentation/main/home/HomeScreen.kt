@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -25,6 +27,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import com.zulfa.eabsensi.R
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -107,6 +110,8 @@ import java.util.Locale
         val markAttendanceState by viewModel.markAttendanceState.collectAsState()
         val requestLeaveState by viewModel.requestLeaveState.collectAsState()
 
+        var isRefreshing by remember { mutableStateOf(false) }
+
 
         val configuration = LocalConfiguration.current
         val screenHeight = configuration.screenHeightDp.dp
@@ -139,6 +144,8 @@ import java.util.Locale
 
     val waktuMasuk = attendanceData?.checkInTime?:"-"
     val posisiMasuk = attendanceData?.status?:"-"
+    val status = attendanceData?.status?:"-"
+
 
 
     // 🔑 Show dialog only when state is Success + flag is true
@@ -247,217 +254,240 @@ import java.util.Locale
         }
     }
 
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            viewModel.getTodayAttendance()
+            delay(1200)
+            isRefreshing = false
+        }
+    }
+
     val officeLocation = LatLng(-3.3089332, 114.613662)
     val radius = 100.0 // meter
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(0.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { isRefreshing = true }
     ) {
-        // ✅ Header
-        Card(
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+                .fillMaxSize()
+                .padding(0.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
+            // ✅ Header
+            Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        "Halo,",
-                        fontFamily = Poppins,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = responsiveFontSize(screenWidth, 14.sp)
-                    )
-                    Text(
-                        user.name,
-                        fontFamily = Poppins,
-                        fontSize = responsiveFontSize(screenWidth, 14.sp),
-                        color = Color.Gray,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = getTodayDate(),
-                        fontFamily = Poppins,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = responsiveFontSize(screenWidth, 14.sp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        softWrap = false
-                    )
-                    Text(
-                        text = currentTime,
-                        fontFamily = Poppins,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = responsiveFontSize(screenWidth, 14.sp)
-                    )
-                }
-            }
-        }
-
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(screenHeight * 0.35f)
-                .padding(horizontal = screenWidth * 0.04f),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-
-        ) {
-            GoogleMap(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp)),
-                cameraPositionState = cameraPositionState
-            ) {
-                currentLocation?.let { loc ->
-                    Marker(
-                        state = MarkerState(position = loc),
-                        title = "You are here"
-                    )
-                }
-                Circle(
-                    center = officeLocation,
-                    radius = radius,
-                    fillColor = Color(0x2200FF00),
-                    strokeColor = Color(0xFF00FF00),
-                    strokeWidth = 2f
-                )
-            }
-        }
-
-        // Card for Waktu Masuk Tercatat and Posisi Tercatat with responsive spacing
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(screenHeight * 0.35f)
-                .padding(horizontal = screenWidth * 0.04f),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ){
-
-            Column(
-                modifier =  Modifier.padding(screenWidth * 0.04f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Column {
-                        Text("Waktu Masuk Tercatat", fontFamily = Poppins, fontWeight = FontWeight.Bold,fontSize = responsiveFontSize(screenWidth, 14.sp))
-                        Text(formatTimeToWITA(waktuMasuk), color = Color(0xFF1565C0), fontWeight = FontWeight.Bold, fontSize = responsiveFontSize(screenWidth, 14.sp))
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            "Halo,",
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = responsiveFontSize(screenWidth, 14.sp)
+                        )
+                        Text(
+                            user.name,
+                            fontFamily = Poppins,
+                            fontSize = responsiveFontSize(screenWidth, 14.sp),
+                            color = Color.Gray,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text("Posisi Tercatat",fontFamily = Poppins, fontWeight = FontWeight.Bold,fontSize = responsiveFontSize(screenWidth, 14.sp))
-                        Text(posisiMasuk, color = Color(0xFF03A9F4), fontWeight = FontWeight.Bold, fontSize = responsiveFontSize(screenWidth, 14.sp))
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = getTodayDate(),
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = responsiveFontSize(screenWidth, 14.sp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            softWrap = false
+                        )
+                        Text(
+                            text = currentTime,
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = responsiveFontSize(screenWidth, 14.sp)
+                        )
                     }
                 }
+            }
 
-                OutlinedButton(
-                    onClick = {        when {
-                        // 🚨 Location permission not granted
-                        !locationPermissionState.status.isGranted -> {
-                            showDialogLocationOff = true
-                            locationPermissionState.launchPermissionRequest()
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(screenHeight * 0.35f)
+                    .padding(horizontal = screenWidth * 0.04f),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+
+            ) {
+                GoogleMap(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(16.dp)),
+                    cameraPositionState = cameraPositionState
+                ) {
+                    currentLocation?.let { loc ->
+                        Marker(
+                            state = MarkerState(position = loc),
+                            title = "You are here"
+                        )
+                    }
+                    Circle(
+                        center = officeLocation,
+                        radius = radius,
+                        fillColor = Color(0x2200FF00),
+                        strokeColor = Color(0xFF00FF00),
+                        strokeWidth = 2f
+                    )
+                }
+            }
+
+            // Card for Waktu Masuk Tercatat and Posisi Tercatat with responsive spacing
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(screenHeight * 0.35f)
+                    .padding(horizontal = screenWidth * 0.04f),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ){
+
+                Column(
+                    modifier =  Modifier.padding(screenWidth * 0.04f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text("Waktu Masuk Tercatat", fontFamily = Poppins, fontWeight = FontWeight.Bold,fontSize = responsiveFontSize(screenWidth, 14.sp))
+                            Text(formatTimeToWITA(waktuMasuk), color = Color(0xFF1565C0), fontWeight = FontWeight.Bold, fontSize = responsiveFontSize(screenWidth, 14.sp))
                         }
-
-                        // 🚨 Location service (GPS) off
-                        !isLocationEnabled(context) -> {
-                            showDialogLocationOff = true
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text("Posisi Tercatat",fontFamily = Poppins, fontWeight = FontWeight.Bold,fontSize = responsiveFontSize(screenWidth, 14.sp))
+                            Text(posisiMasuk, color = Color(0xFF03A9F4), fontWeight = FontWeight.Bold, fontSize = responsiveFontSize(screenWidth, 14.sp))
                         }
+                    }
 
-                        else -> {
-                            currentLocation?.let { loc ->
-                                when {
-                                    isMock -> showDialogMock = true
-                                    !isInsideCircle(loc, officeLocation, radius) -> {
-                                        pendingLocation = loc
-                                        showDialogOutOfArea = true
-                                    }
-                                    else -> {
-                                        viewModel.markAttendance(
-                                            userId = user.id,
-                                            latitude = loc.latitude,
-                                            longitude = loc.longitude,
-                                            androidId = Settings.Secure.getString(
-                                                context.contentResolver,
-                                                Settings.Secure.ANDROID_ID
-                                            )
-                                        )
-                                    }
-                                }
-                            } ?: run {
-                                // 🚨 No location yet (maybe still loading)
+                    OutlinedButton(
+                        onClick = {        when {
+                            // 🚨 Location permission not granted
+                            !locationPermissionState.status.isGranted -> {
+                                showDialogLocationOff = true
+                                locationPermissionState.launchPermissionRequest()
+                            }
+
+                            // 🚨 Location service (GPS) off
+                            !isLocationEnabled(context) -> {
                                 showDialogLocationOff = true
                             }
+
+                            else -> {
+                                currentLocation?.let { loc ->
+                                    when {
+                                        isMock -> showDialogMock = true
+                                        !isInsideCircle(loc, officeLocation, radius) -> {
+                                            pendingLocation = loc
+                                            showDialogOutOfArea = true
+                                        }
+                                        else -> {
+                                            viewModel.markAttendance(
+                                                userId = user.id,
+                                                latitude = loc.latitude,
+                                                longitude = loc.longitude,
+                                                androidId = Settings.Secure.getString(
+                                                    context.contentResolver,
+                                                    Settings.Secure.ANDROID_ID
+                                                )
+                                            )
+                                        }
+                                    }
+                                } ?: run {
+                                    // 🚨 No location yet (maybe still loading)
+                                    showDialogLocationOff = true
+                                }
+                            }
                         }
+                        },
+                        modifier = Modifier
+                            .width(210.dp)
+                            .height(60.dp),
+                        border = BorderStroke(width = 2.dp, color = Color(0xFF000000)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0F2FE)), // blue color
+                        shape = RoundedCornerShape(50),
+                    ) {
+                        Text(
+                            text = "Rekam Waktu Masuk",
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(
+                                fontFamily = Poppins,
+                                fontWeight = FontWeight.Light,
+                                fontSize = responsiveFontSize(screenWidth,16.sp),
+                                color = Color(0xFF0284C7)
+                            )
+                        )
                     }
-                    },
-                    modifier = Modifier
-                        .width(210.dp)
-                        .height(60.dp),
-                    border = BorderStroke(width = 2.dp, color = Color(0xFF000000)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0F2FE)), // blue color
-                    shape = RoundedCornerShape(50),
-                ) {
-                    Text(
-                        text = "Rekam Waktu Masuk",
-                        textAlign = TextAlign.Center,
-                        style = TextStyle(
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Light,
-                            fontSize = responsiveFontSize(screenWidth,16.sp),
-                            color = Color(0xFF0284C7)
+
+                    OutlinedButton(
+                        onClick = { showDialogIzin = true },
+                        enabled = (status == "-" || status.isEmpty() || status == "Tidak Hadir"), // ✅ Active only if status is null or "-"
+                        modifier = Modifier
+                            .width(210.dp)
+                            .height(60.dp),
+                        border = BorderStroke(width = 2.dp, color = Color(0xFF000000)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (status == "-" || status.isEmpty()|| status == "Tidak Hadir") Color(0xFFE0F2FE) else Color(0xFFE5E7EB), // ✅ Gray when disabled
+                            disabledContainerColor = Color(0xFFE5E7EB), // light gray when disabled
+                            contentColor = Color(0xFF0284C7),
+                            disabledContentColor = Color(0xFF94A3B8) // dimmed blue-gray
+                        ),
+                        shape = RoundedCornerShape(50),
+                    ) {
+                        Text(
+                            text = "Ajukan Izin",
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(
+                                fontFamily = Poppins,
+                                fontWeight = FontWeight.Light,
+                                fontSize = responsiveFontSize(screenWidth, 16.sp),
+                                color = if (status == "-" || status.isEmpty() || status == "Tidak Hadir") Color(0xFF0284C7) else Color(0xFF94A3B8)
+                            )
                         )
-                    )
-                }
-                OutlinedButton(
-                    onClick = { showDialogIzin = true },
-                    modifier = Modifier
-                        .width(210.dp)
-                        .height(60.dp),
-                    border = BorderStroke(width = 2.dp, color = Color(0xFF000000)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0F2FE)), // blue color
-                    shape = RoundedCornerShape(50),
-                ) {
-                    Text(
-                        text = "Ajukan Izin",
-                        textAlign = TextAlign.Center,
-                        style = TextStyle(
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Light,
-                            fontSize = responsiveFontSize(screenWidth,16.sp),
-                            color = Color(0xFF0284C7)
-                        )
-                    )
+                    }
                 }
             }
         }
     }
+
     if (showDialogIzin) {
         AlertDialog(
             onDismissRequest = { showDialogIzin = false },
@@ -560,7 +590,7 @@ import java.util.Locale
                     ))
                 }
             },
-            text = { Text("Lokasi Anda berada di luar area yang diizinkan.") }
+            text = { Text("Lokasi Anda berada di luar area yang diizinkan, tetap lanjutkan catat absensi?.") }
         )
     }
 

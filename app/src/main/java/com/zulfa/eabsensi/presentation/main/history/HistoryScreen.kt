@@ -15,13 +15,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -71,6 +74,8 @@ fun HistoryScreen(
     val user by userPreference.getSession().collectAsState(
         initial = UserModel("", "", "", "", false)
     )
+    var isRefreshing by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
         viewModel.getAttendanceHistory()
@@ -85,141 +90,155 @@ fun HistoryScreen(
         if (logoutState) onLogout()
     }
 
-    // 🔹 Responsiveness container
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            viewModel.getAttendanceHistory()
+            delay(1200)
+            isRefreshing = false
+        }
+    }
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { isRefreshing = true }
     ) {
-        val screenWidth = maxWidth
-        val screenHeight = maxHeight
-
-        val horizontalPadding = screenWidth * 0.06f
-        val verticalSpacing = screenHeight * 0.02f
-        val buttonHeight = screenHeight * 0.065f
-
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 8.dp),
-            verticalArrangement = Arrangement.Top
         ) {
-            // ✅ Header
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column {
-                        Text(
-                            "Halo,",
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = responsiveFontSize(screenWidth, 18.sp),
-                            color = Color.Black
-                        )
-                        Text(
-                            user.name,
-                            fontFamily = Poppins,
-                            fontSize = responsiveFontSize(screenWidth, 14.sp),
-                            color = Color.Gray
-                        )
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            getTodayDate(),
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = responsiveFontSize(screenWidth, 14.sp)
-                        )
-                        Text(
-                            currentTime,
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = responsiveFontSize(screenWidth, 18.sp)
-                        )
-                    }
-                }
-            }
+            val screenWidth = maxWidth
+            val screenHeight = maxHeight
 
-            Spacer(modifier = Modifier.height(verticalSpacing))
+            val horizontalPadding = screenWidth * 0.06f
+            val verticalSpacing = screenHeight * 0.02f
+            val buttonHeight = screenHeight * 0.065f
 
-            // ✅ Logout button
-            OutlinedButton(
-                onClick = { viewModel.logout() },
+            Column(
                 modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
-                    .fillMaxWidth()
-                    .height(buttonHeight),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFCEC9)),
-                shape = RoundedCornerShape(50)
+                    .fillMaxSize()
+                    .padding(bottom = 8.dp),
+                verticalArrangement = Arrangement.Top
             ) {
-                Text(
-                    text = "LOGOUT",
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontFamily = Poppins,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = responsiveFontSize(screenWidth , 20.sp),
-                        color = Color(0xFFA61F1F)
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(verticalSpacing))
-
-            // ✅ History list (scrollable)
-            when (historyState) {
-                is Resource.Loading -> {
-                    Box(
+                // ✅ Header
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
+                            .padding(horizontal = horizontalPadding, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
                     ) {
-                        CircularProgressIndicator()
-                    }
-                }
-
-                is Resource.Success -> {
-                    val data = (historyState as Resource.Success<List<HistoryAttendanceDomain>>).data
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = horizontalPadding),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(data ?: emptyList()) { item ->
-                            HistoryCard(
-                                date = formatDateToIndonesian(item.date),
-                                time = formatTimeToWITA(item.checkInTime),
-                                status = item.status,
-                                Width = screenWidth
+                        Column {
+                            Text(
+                                "Halo,",
+                                fontFamily = Poppins,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = responsiveFontSize(screenWidth, 18.sp),
+                                color = Color.Black
+                            )
+                            Text(
+                                user.name,
+                                fontFamily = Poppins,
+                                fontSize = responsiveFontSize(screenWidth, 14.sp),
+                                color = Color.Gray
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                getTodayDate(),
+                                fontFamily = Poppins,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = responsiveFontSize(screenWidth, 14.sp)
+                            )
+                            Text(
+                                currentTime,
+                                fontFamily = Poppins,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = responsiveFontSize(screenWidth, 18.sp)
                             )
                         }
                     }
                 }
 
-                is Resource.Error -> {
-                    val message = (historyState as Resource.Error).message
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = message ?: "Error loading data",
-                            fontSize = responsiveFontSize(screenWidth, 14.sp)
+                Spacer(modifier = Modifier.height(verticalSpacing))
+
+                // ✅ Logout button
+                OutlinedButton(
+                    onClick = { viewModel.logout() },
+                    modifier = Modifier
+                        .padding(horizontal = horizontalPadding)
+                        .fillMaxWidth()
+                        .height(buttonHeight),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFCEC9)),
+                    shape = RoundedCornerShape(50)
+                ) {
+                    Text(
+                        text = "LOGOUT",
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(
+                            fontFamily = Poppins,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = responsiveFontSize(screenWidth, 20.sp),
+                            color = Color(0xFFA61F1F)
                         )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(verticalSpacing))
+
+                // ✅ History list (scrollable)
+                when (historyState) {
+                    is Resource.Loading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    is Resource.Success -> {
+                        val data =
+                            (historyState as Resource.Success<List<HistoryAttendanceDomain>>).data
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = horizontalPadding),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(data ?: emptyList()) { item ->
+                                HistoryCard(
+                                    date = formatDateToIndonesian(item.date),
+                                    time = formatTimeToWITA(item.checkInTime),
+                                    status = item.status,
+                                    Width = screenWidth
+                                )
+                            }
+                        }
+                    }
+
+                    is Resource.Error -> {
+                        val message = (historyState as Resource.Error).message
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState())
+                                .weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = message ?: "Error loading data",
+                                fontSize = responsiveFontSize(screenWidth, 14.sp)
+                            )
+                        }
                     }
                 }
             }

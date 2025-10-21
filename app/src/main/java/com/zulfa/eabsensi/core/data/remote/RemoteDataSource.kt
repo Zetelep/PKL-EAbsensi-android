@@ -44,8 +44,15 @@ class RemoteDataSource(private val apiService: ApiService) {
                 Log.e("RemoteDataSource", errorMessage ?: e.toString())
             }
             catch (e: Exception) {
-                emit(ApiResponse.Error(e.toString()))
-                Log.e("RemoteDataSource", e.toString())
+                val errorMessage = when (e) {
+                    is java.net.UnknownHostException ->
+                        "Koneksi internet atau server bermasalah, silakan periksa koneksi internet Anda. Jika masalah ini terus berlanjut, hubungi Admin."
+                    is java.net.SocketTimeoutException ->
+                        "Koneksi terputus. Silakan periksa koneksi internet Anda"
+                    else -> e.localizedMessage ?: "Unexpected error occurred."
+                }
+                emit(ApiResponse.Error(errorMessage))
+                Log.e("RemoteDataSource", errorMessage)
             }
         }.flowOn(Dispatchers.IO)
 
@@ -67,8 +74,15 @@ class RemoteDataSource(private val apiService: ApiService) {
                 Log.e("RemoteDataSource", errorMessage ?: e.toString())
             }
             catch (e: Exception) {
-                emit(ApiResponse.Error(e.toString()))
-                Log.e("RemoteDataSource", e.toString())
+                val errorMessage = when (e) {
+                    is java.net.UnknownHostException ->
+                        "Internet or server error, please check your internet. If this keeps happening, contact the Admin."
+                    is java.net.SocketTimeoutException ->
+                        "Connection timed out. Please check your internet connection."
+                    else -> e.localizedMessage ?: "Unexpected error occurred."
+                }
+                emit(ApiResponse.Error(errorMessage))
+                Log.e("RemoteDataSource", errorMessage)
             }
         }.flowOn(Dispatchers.IO)
     }
@@ -95,8 +109,15 @@ class RemoteDataSource(private val apiService: ApiService) {
                 Log.e("RemoteDataSource", errorMessage ?: e.toString())
             }
             catch (e: Exception) {
-                emit(ApiResponse.Error(e.toString()))
-                Log.e("RemoteDataSource", e.toString())
+                val errorMessage = when (e) {
+                    is java.net.UnknownHostException ->
+                        "Internet or server error, please check your internet. If this keeps happening, contact the Admin."
+                    is java.net.SocketTimeoutException ->
+                        "Connection timed out. Please check your internet connection."
+                    else -> e.localizedMessage ?: "Unexpected error occurred."
+                }
+                emit(ApiResponse.Error(errorMessage))
+                Log.e("RemoteDataSource", errorMessage)
             }
         }.flowOn(Dispatchers.IO)
 
@@ -127,8 +148,15 @@ class RemoteDataSource(private val apiService: ApiService) {
                 Log.e("RemoteDataSource", errorMessage ?: e.toString())
             }
             catch (e: Exception) {
-                emit(ApiResponse.Error(e.toString()))
-                Log.e("RemoteDataSource", e.toString())
+                val errorMessage = when (e) {
+                    is java.net.UnknownHostException ->
+                        "Internet or server error, please check your internet. If this keeps happening, contact the Admin."
+                    is java.net.SocketTimeoutException ->
+                        "Connection timed out. Please check your internet connection."
+                    else -> e.localizedMessage ?: "Unexpected error occurred."
+                }
+                emit(ApiResponse.Error(errorMessage))
+                Log.e("RemoteDataSource", errorMessage)
             }
         }.flowOn(Dispatchers.IO)
     }
@@ -160,8 +188,15 @@ class RemoteDataSource(private val apiService: ApiService) {
                 Log.e("RemoteDataSource", errorMessage ?: e.toString())
             }
             catch (e: Exception) {
-                emit(ApiResponse.Error(e.toString()))
-                Log.e("RemoteDataSource", e.toString())
+                val errorMessage = when (e) {
+                    is java.net.UnknownHostException ->
+                        "Internet or server error, please check your internet. If this keeps happening, contact the Admin."
+                    is java.net.SocketTimeoutException ->
+                        "Connection timed out. Please check your internet connection."
+                    else -> e.localizedMessage ?: "Unexpected error occurred."
+                }
+                emit(ApiResponse.Error(errorMessage))
+                Log.e("RemoteDataSource", errorMessage)
             }
         }.flowOn(Dispatchers.IO)
     }
@@ -187,8 +222,15 @@ class RemoteDataSource(private val apiService: ApiService) {
                 Log.e("RemoteDataSource", errorMessage ?: e.toString())
             }
             catch (e: Exception) {
-                emit(ApiResponse.Error(e.toString()))
-                Log.e("RemoteDataSource", e.toString())
+                val errorMessage = when (e) {
+                    is java.net.UnknownHostException ->
+                        "Internet or server error, please check your internet. If this keeps happening, contact the Admin."
+                    is java.net.SocketTimeoutException ->
+                        "Connection timed out. Please check your internet connection."
+                    else -> e.localizedMessage ?: "Unexpected error occurred."
+                }
+                emit(ApiResponse.Error(errorMessage))
+                Log.e("RemoteDataSource", errorMessage)
             }
         }.flowOn(Dispatchers.IO)
     }
