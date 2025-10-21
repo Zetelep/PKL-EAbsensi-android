@@ -14,10 +14,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +31,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zulfa.eabsensi.R
+import com.zulfa.eabsensi.core.data.pref.UserModel
+import com.zulfa.eabsensi.core.data.pref.UserPreference
+import com.zulfa.eabsensi.core.data.pref.dataStore
 import com.zulfa.eabsensi.presentation.theme.EAbsensiTheme
 import com.zulfa.eabsensi.presentation.theme.Poppins
 
@@ -36,38 +43,50 @@ fun OnboardingScreen(
 ) {
     val scrollState = rememberScrollState()
 
+    val context = LocalContext.current
+    val userPreference = remember { UserPreference.getInstance(context.dataStore) }
+    val user by userPreference.getSession().collectAsState(initial = UserModel(
+        "",
+        "",
+        "",
+        "",
+        false
+    )
+    )
     Scaffold(
         contentWindowInsets = WindowInsets.systemBars,
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .imePadding()
-                    .padding(horizontal = 24.dp, vertical = 12.dp)
-            ) {
-                OutlinedButton(
-                    onClick = { onFinish() },
+            if (!user.isLogin) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
-                    border = BorderStroke(width = 2.dp, color = Color(0xFF000000)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0F2FE)),
-                    shape = RoundedCornerShape(50)
+                        .navigationBarsPadding()
+                        .imePadding()
+                        .padding(horizontal = 24.dp, vertical = 12.dp)
                 ) {
-                    Text(
-                        text = "MULAI",
-                        textAlign = TextAlign.Center,
-                        style = TextStyle(
-                            fontFamily = Poppins,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 30.sp,
-                            color = Color(0xFF0284C7),
-                            textAlign = TextAlign.Center
-                        ),
-                        maxLines = 1,
-                        softWrap = false
-                    )
+                    OutlinedButton(
+                        onClick = { onFinish() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        border = BorderStroke(width = 2.dp, color = Color(0xFF000000)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0F2FE)),
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Text(
+                            text = "MULAI",
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(
+                                fontFamily = Poppins,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 30.sp,
+                                color = Color(0xFF0284C7),
+                                textAlign = TextAlign.Center
+                            ),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                 }
             }
         }
