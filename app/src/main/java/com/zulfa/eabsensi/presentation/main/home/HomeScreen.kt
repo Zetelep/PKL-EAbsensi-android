@@ -446,7 +446,7 @@ import java.util.Locale
                         shape = RoundedCornerShape(50),
                     ) {
                         Text(
-                            text = "Rekam Waktu Masuk",
+                            text = "Rekam Kehadiran",
                             textAlign = TextAlign.Center,
                             style = TextStyle(
                                 fontFamily = Poppins,
