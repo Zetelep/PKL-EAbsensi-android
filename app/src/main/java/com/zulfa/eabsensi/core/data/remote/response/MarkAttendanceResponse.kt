@@ -48,5 +48,7 @@ data class MarkAttendanceResponseItem(
 data class MarkAttendanceRequest(
 	val latitude: Double,
 	val longitude: Double,
+
+	@field:SerializedName("android_id")
 	val androidId: String
 )
